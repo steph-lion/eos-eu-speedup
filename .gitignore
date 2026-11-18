@@ -1,0 +1,13 @@
+*.nds
+*.sav
+*.dsv
+*.ml[0-9]
+*.xdelta
+
+/rom/
+/out/
+/dist/
+/SkyTemple/
+
+/.venv/
+__pycache__/

@@ -1,0 +1,124 @@
+# EoS EU Speedup
+
+A patch for the **European** release of **Pokémon Mystery Dungeon: Explorers of Sky** that adds an adjustable **1x–4x dungeon speed**.
+
+The speed-up is native: the game logic is not run multiple times per frame. Durations are shortened directly in the game code, so it costs no extra CPU time and works on real hardware.
+
+## Features
+
+| Input | Effect |
+|---|---|
+| **Select** (in a dungeon) | Cycles the speed 1x → 2x → 3x → 4x → 1x and shows it in the message log |
+
+- Speeds up walking for every Pokémon on the floor: team members and enemies alike.
+- The setting persists until the game is turned off. It starts at 1x on boot.
+- Inside dungeons, Select is used only for the speed setting. Its vanilla action is disabled there.
+- Cutscenes, the guild and towns run at normal speed.
+- The message is localized for all five EU languages.
+
+**Planned:** attack and effect animations, turn delays, text speed, and a menu option saved to the save file.
+
+## Installation
+
+You need your own **European** Explorers of Sky ROM (game code `C2SP`):
+
+| | |
+|---|---|
+| File | `Pokemon Mystery Dungeon - Explorers of Sky (Europe) (En,Fr,De,Es,It).nds` |
+| SHA1 | `c838a5adf1ed32d2da8454976e5b1a1aa189c139` |
+
+1. Download the `.xdelta` file from [Releases](../../releases).
+2. Apply it to the clean ROM with [Rom Patcher JS](https://www.marcrobledo.com/RomPatcher.js/) or Delta Patcher.
+3. Play the patched ROM in an emulator such as [melonDS](https://melonds.kuribo64.net/), or on a 3DS with TWiLight Menu++.
+
+**Notes:**
+- Saves from the original ROM are compatible: copy the `.sav` file and give it the same name as the patched ROM.
+- After updating the patch, load in-game saves rather than emulator savestates. Savestates keep the previous version of the patch code in memory.
+- Tested on melonDS. Real 3DS testing is still pending.
+
+This repository does not contain or distribute any ROM.
+
+## Combining with other patches
+
+The patch includes Frostbyte's **ExtraSpace** patch, which c-of-time needs to load custom code. Other [SkyTemple](https://skytemple.org) ASM patches are expected to work when applied on top of the patched ROM with SkyTemple, but that order is not tested yet. The tested order is the opposite: SkyTemple patches first, then this patch built on top (see below).
+
+To add the speed patch to an existing EU ROM hack, build from source and pass your ROM to the build script. The build stops if the hack changed any of the game locations this patch modifies, or if it uses the message IDs 17298–17301.
+
+## Building from source (Windows)
+
+Requirements: Git, Python 3.12, [MSYS2](https://www.msys2.org/) and [SkyTemple](https://skytemple.org), which provides `armips`.
+
+```bash
+git clone --recursive https://github.com/steph-lion/eos-eu-speedup.git
+cd eos-eu-speedup
+```
+
+In an **MSYS2 UCRT64** terminal:
+
+```bash
+pacman -S git make xdelta3 mingw-w64-ucrt-x86_64-arm-none-eabi-toolchain mingw-w64-ucrt-x86_64-python mingw-w64-ucrt-x86_64-python-pip mingw-w64-ucrt-x86_64-python-yaml
+```
+
+```bash
+pip3 install --break-system-packages ndspy
+```
+
+In Git Bash, from the project folder:
+
+```bash
+py -3.12 -m venv .venv
+```
+
+```bash
+.venv/Scripts/python -m pip install -r requirements.txt
+```
+
+Then:
+1. Put the clean EU ROM in `rom/`, or pass its path to the build script.
+2. If SkyTemple is not installed in `SkyTemple/` inside the project, set `SKYTEMPLE_ARMIPS_EXEC` to its `armips.exe`.
+3. Build the ROM and the patch:
+
+```bash
+bash scripts/build_rom.sh
+```
+
+```bash
+bash scripts/make_patch.sh v0.1.0
+```
+
+The outputs are `out/eos-eu-speedup.nds` and `dist/eos-eu-speedup-v0.1.0.xdelta`.
+
+To build on top of another EU ROM hack:
+
+```bash
+bash scripts/build_rom.sh path/to/hack.nds out/hack-speedup.nds
+```
+
+## Layout
+
+| Path | Contents |
+|---|---|
+| `scripts/prepare_rom.py` | Applies ExtraSpace and writes the localized speed messages |
+| `scripts/check_addresses.py` | Verifies the instructions replaced by the speed patch |
+| `scripts/build_rom.sh` | Builds the patched ROM |
+| `scripts/make_patch.sh` | Creates the distributable `.xdelta` |
+| `c-of-time/src/speed.c`, `c-of-time/src/speed_hook.s` | Speed patch code |
+| `c-of-time/patches/speed.asm` | Patched game locations (EU addresses) |
+
+### How the speed patch works
+The game has an internal "Speed" option (`GetSpeedOption`). When it is set to fast, the game uses a walk multiplier of 2: each tile takes 24 / multiplier frames and the sprite moves multiplier pixels per frame. The multiplier is computed in three places in overlay 29. The patch replaces all three with a value from 1 to 4. Since 24 is divisible by 1, 2, 3 and 4, every step stays whole and even.
+
+Speed cycling hooks `GetAndStoreButtonInput`. The hook reads Select, then clears it from the input the dungeon sees.
+
+## Credits
+- [c-of-time](https://github.com/SkyTemple/c-of-time), vendored in `c-of-time/` at `1b6cabb`
+- [pmdsky-debug](https://github.com/UsernameFodder/pmdsky-debug) by UsernameFodder and contributors
+- ExtraSpace by Frostbyte, applied through [SkyTemple](https://skytemple.org)
+- [armips](https://github.com/Kingcom/armips) by Kingcom
+
+## License
+Same split as c-of-time:
+- scripts in `scripts/` and `c-of-time/scripts/` are licensed under **GPLv3** ([LICENSE_GPLv3](LICENSE_GPLv3));
+- all other code (C, assembly, patches) is licensed under **MIT** ([LICENSE_MIT](LICENSE_MIT)).
+
+This is a fan project, not affiliated with Nintendo, The Pokémon Company, Chunsoft or Spike Chunsoft. Pokémon is a trademark of its respective owners.

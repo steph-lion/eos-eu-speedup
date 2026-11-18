@@ -36,6 +36,7 @@ export RANLIB   :=      $(PREFIX)gcc-ranlib
 #---------------------------------------------------------------------------------
 %.elf:
 	echo linking $(notdir $@)
+	cat $(LD_SCRIPTS) > $(CURDIR)/combined_$(REGION).ld
 	$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 
 #---------------------------------------------------------------------------------
@@ -93,8 +94,12 @@ CUSTOM_LDS := $(wildcard $(CURDIR)/../symbols/custom_$(REGION).ld) \
               $(wildcard $(CURDIR)/../modules/*/symbols/custom_$(REGION).ld) \
               $(wildcard $(CURDIR)/../modules/*/symbols/custom_$(REGION)_*.ld) \
               $(wildcard $(CURDIR)/../modules/*/linker.ld)
-LDFLAGS	=	-T $(CURDIR)/../symbols/generated_$(REGION).ld \
-			$(foreach ld,$(CUSTOM_LDS),-T $(ld)) -T $(CURDIR)/../linker.ld \
+# Local fix: binutils >= 2.47 on Windows (MSYS2) wrongly reports different
+# "-T" scripts as the same file ("appears multiple times"), so all linker
+# scripts are concatenated into a single file before linking.
+LD_SCRIPTS =	$(CURDIR)/../symbols/generated_$(REGION).ld \
+			$(CUSTOM_LDS) $(CURDIR)/../linker.ld
+LDFLAGS	=	-T $(CURDIR)/combined_$(REGION).ld \
 			-g $(ARCH) -Wl,-Map,$(notdir $*.map) -Xlinker -no-enum-size-warning -nostdlib  -Xlinker --no-check-sections
 
 #---------------------------------------------------------------------------------

@@ -46,7 +46,7 @@ export RANLIB   :=      $(PREFIX)gcc-ranlib
 #---------------------------------------------------------------------------------
 
 #             <-- Change to EU or JP if required
-REGION := NA
+REGION := EU
 ROM := rom.nds
 ROM_OUT := out.nds
 

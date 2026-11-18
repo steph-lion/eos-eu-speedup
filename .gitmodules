@@ -1,0 +1,4 @@
+[submodule "c-of-time/pmdsky-debug"]
+	path = c-of-time/pmdsky-debug
+	url = https://github.com/UsernameFodder/pmdsky-debug
+	ignore = dirty

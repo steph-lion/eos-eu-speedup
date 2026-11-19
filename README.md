@@ -13,6 +13,7 @@ The speed-up is native: the game logic is not run multiple times per frame. Dura
 What the speed affects:
 - **Walking** of every Pokémon on the floor, team members and enemies alike.
 - **Message pause**: after each dungeon message ("X used Y!") the game blocks for 60 frames at 1x, 30 at 2x, 20 at 3x and 15 at 4x. The message stays on screen for its usual time.
+- **Animations**: every sprite animation in a dungeon (attacks, move effects, hit reactions, idle) advances N steps per frame. Outside dungeons animations run at normal speed.
 - **Message box**: the dungeon message box prints and scrolls its lines up to N times per frame.
 - **Text speed**: text is revealed 1 to 4 characters per step, in dungeons and in every other dialogue, using the last speed set in a dungeon.
 
@@ -22,7 +23,6 @@ Notes:
 - Cutscene movement, the guild and towns run at normal speed. Dialogue still waits for a button press.
 - The speed message is localized for all five EU languages.
 
-**Planned:** attack and effect animations.
 
 ## Installation
 
@@ -119,6 +119,8 @@ Speed cycling hooks `GetAndStoreButtonInput`. The hook reads Select, then clears
 `LogMessage` starts the message box timer at 240 frames and `WaitUntilAlertBoxPauseIsOver` blocks until it drops below 180. The patch raises that threshold with the speed, so the blocking part shrinks while the box keeps its display time.
 
 `UpdateAlertBox` prints one line or scrolls the message box by 2 pixels per call. While the box is printing or scrolling, the patch calls it up to N times per frame.
+
+`SwitchAnimationControlToNextFrame` subtracts an animation step from the current frame duration every frame. In dungeons the patch multiplies that step by the speed. A hook on `AdvanceFrame`, which only runs in dungeon mode, tells the patch whether a dungeon is active.
 
 The text renderer copies a "characters per step" value from the text box state before revealing text. The patch multiplies that value by the speed at both places where it is read.
 

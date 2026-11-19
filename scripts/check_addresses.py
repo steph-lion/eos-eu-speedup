@@ -20,6 +20,8 @@ PUSH_R4_LR = 0xE92D4010
 FLOOR_CARD_DECREMENT = 0x2349020
 SUB_R5_R5_1 = 0xE2455001
 FADE_DELTA_LOADS = {0x234D544: 0xE5940094, 0x234D56C: 0xE5941094, 0x234D598: 0xE5940094, 0x234D5C0: 0xE5940094}
+CAMERA_PAUSE_COUNTER_LOAD = 0x22FA328
+LDRSH_R0_R0_28 = 0xE1D001FC
 PROJECTILE_ADVANCE_FRAMES = [0x232413C, 0x2348A28]
 
 
@@ -59,6 +61,7 @@ def main() -> None:
     checks.append((FLOOR_CARD_DECREMENT, "ov29", word_at(FLOOR_CARD_DECREMENT) == SUB_R5_R5_1))
     checks += [(addr, "ov29", word_at(addr) == word) for addr, word in FADE_DELTA_LOADS.items()]
     checks += [(addr, "ov29", bl_target(addr, word_at(addr)) == ADVANCE_FRAME) for addr in PROJECTILE_ADVANCE_FRAMES]
+    checks.append((CAMERA_PAUSE_COUNTER_LOAD, "ov29", word_at(CAMERA_PAUSE_COUNTER_LOAD) == LDRSH_R0_R0_28))
 
     for addr, binary, ok in checks:
         print(f"  {binary} {addr:#x}: {word_at(addr, binary):08x} {'OK' if ok else 'UNEXPECTED'}")

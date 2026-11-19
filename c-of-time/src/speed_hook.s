@@ -85,3 +85,13 @@ SpeedFadeDeltaR1:
   pop  {r0, pc}
 .pool
 
+.align 4
+.global SpeedCameraPauseCounter
+SpeedCameraPauseCounter:
+  push {r1, lr}
+  ldrsh r0, [r0, #28]
+  ldr  r1, =SpeedMultiplier
+  ldr  r1, [r1]
+  mul  r0, r1, r0
+  pop  {r1, pc}
+.pool

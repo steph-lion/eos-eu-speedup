@@ -52,6 +52,10 @@
   .org 0x234D5C0
     bl SpeedFadeDeltaR0
 
+  // TryPointCameraToMonster: frames waited before a camera switch ("ldrsh r0, [r0, #28]").
+  .org 0x22FA328
+    bl SpeedCameraPauseCounter
+
   // Projectile flight loops (straight and curved): AdvanceFrame calls.
   .org 0x232413C
     bl SpeedProjectileAdvanceFrame

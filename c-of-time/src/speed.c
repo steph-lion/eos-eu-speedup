@@ -37,6 +37,16 @@ __attribute__((used)) int SpeedGetAnimationMultiplier(void) {
   return (FRAMES_SINCE_LAUNCH - last_dungeon_frame <= 2) ? SpeedMultiplier : SPEED_MIN;
 }
 
+__attribute__((section(".data"))) static int projectile_frames = 0;
+
+// Projectiles move a fixed distance per loop iteration, so only every Nth iteration shows a frame.
+__attribute__((used)) void SpeedProjectileAdvanceFrame(undefined param) {
+  if (++projectile_frames >= SpeedMultiplier) {
+    projectile_frames = 0;
+    AdvanceFrame(param);
+  }
+}
+
 #define ALERT_BOX_STATE_PRINTING 2
 #define ALERT_BOX_STATE_SCROLLING 3
 

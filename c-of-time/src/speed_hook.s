@@ -55,3 +55,35 @@ SpeedAnimationStepHook:
   ldrsh r1, [r4, #4]
   mul  r0, r1, r0
   pop  {r1, r2, r3, r4, ip, pc}
+
+.align 4
+.global SpeedFloorCardStep
+SpeedFloorCardStep:
+  push {r0, lr}
+  ldr  r0, =SpeedMultiplier
+  ldr  r0, [r0]
+  sub  r5, r5, r0
+  pop  {r0, pc}
+.pool
+
+.align 4
+.global SpeedFadeDeltaR0
+SpeedFadeDeltaR0:
+  push {r1, lr}
+  ldr  r0, [r4, #148]
+  ldr  r1, =SpeedMultiplier
+  ldr  r1, [r1]
+  mul  r0, r1, r0
+  pop  {r1, pc}
+.pool
+
+.align 4
+.global SpeedFadeDeltaR1
+SpeedFadeDeltaR1:
+  push {r0, lr}
+  ldr  r1, [r4, #148]
+  ldr  r0, =SpeedMultiplier
+  ldr  r0, [r0]
+  mul  r1, r0, r1
+  pop  {r0, pc}
+.pool

@@ -37,6 +37,26 @@
   // WaitUntilAlertBoxPauseIsOver: "cmp r0, #180" against a speed-dependent threshold.
   .org 0x234C67C
     bl SpeedAlertPauseCompare
+
+  // HandleFloorCard: "sub r5, r5, #1" (frames left on the floor title card).
+  .org 0x2349020
+    bl SpeedFloorCardStep
+
+  // Dungeon fade update: "ldr rX, [r4, #148]" (brightness change per frame).
+  .org 0x234D544
+    bl SpeedFadeDeltaR0
+  .org 0x234D56C
+    bl SpeedFadeDeltaR1
+  .org 0x234D598
+    bl SpeedFadeDeltaR0
+  .org 0x234D5C0
+    bl SpeedFadeDeltaR0
+
+  // Projectile flight loops (straight and curved): AdvanceFrame calls.
+  .org 0x232413C
+    bl SpeedProjectileAdvanceFrame
+  .org 0x2348A28
+    bl SpeedProjectileAdvanceFrame
 .close
 
 // Text renderer: characters revealed per step ("ldreq r0, [r4, #100]") scaled by the speed.

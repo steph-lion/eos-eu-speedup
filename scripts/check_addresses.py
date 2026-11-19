@@ -17,6 +17,10 @@ PUSH_R3_R9_LR = 0xE92D43F8
 ADVANCE_FRAME = 0x22EA990
 ANIMATION_STEP_LOADS = [0x201C524, 0x201C53C, 0x201C568]
 LDRSH_R0_R4_4 = 0xE1D400F4
+FLOOR_CARD_DECREMENT = 0x2349020
+SUB_R5_R5_1 = 0xE2455001
+FADE_DELTA_LOADS = {0x234D544: 0xE5940094, 0x234D56C: 0xE5941094, 0x234D598: 0xE5940094, 0x234D5C0: 0xE5940094}
+PROJECTILE_ADVANCE_FRAMES = [0x232413C, 0x2348A28]
 
 
 def bl_target(addr: int, word: int) -> int | None:
@@ -34,26 +38,31 @@ def main() -> None:
     args = parser.parse_args()
 
     rom = NintendoDSRom.fromFile(args.rom)
-    overlay = rom.loadArm9Overlays()[29]
+    overlays = rom.loadArm9Overlays()
     arm9 = rom.loadArm9()
-    arm9_data = arm9.save(compress=False)
+    binaries = {
+        "arm9": (arm9.ramAddress, arm9.save(compress=False)),
+        "ov29": (overlays[29].ramAddress, overlays[29].data),
+    }
 
-    def word_at(addr: int) -> int:
-        if addr < overlay.ramAddress:
-            return struct.unpack_from("<I", arm9_data, addr - arm9.ramAddress)[0]
-        return struct.unpack_from("<I", overlay.data, addr - overlay.ramAddress)[0]
+    def word_at(addr: int, binary: str = "ov29") -> int:
+        base, data = binaries[binary]
+        return struct.unpack_from("<I", data, addr - base)[0]
 
-    checks = [(addr, bl_target(addr, word_at(addr)) == GET_SPEED_OPTION) for addr in SPEED_OPTION_CALL_SITES]
-    checks.append((GET_AND_STORE_BUTTON_INPUT, word_at(GET_AND_STORE_BUTTON_INPUT) == PUSH_R3_LR))
-    checks.append((ALERT_BOX_PAUSE_CMP, word_at(ALERT_BOX_PAUSE_CMP) == CMP_R0_180))
-    checks += [(addr, word_at(addr) == LDREQ_R0_R4_100) for addr in TEXT_SPEED_LOADS]
-    checks.append((UPDATE_ALERT_BOX, word_at(UPDATE_ALERT_BOX) == PUSH_R3_R9_LR))
-    checks.append((ADVANCE_FRAME, word_at(ADVANCE_FRAME) == PUSH_R3_LR))
-    checks += [(addr, word_at(addr) == LDRSH_R0_R4_4) for addr in ANIMATION_STEP_LOADS]
+    checks = [(addr, "ov29", bl_target(addr, word_at(addr)) == GET_SPEED_OPTION) for addr in SPEED_OPTION_CALL_SITES]
+    checks.append((GET_AND_STORE_BUTTON_INPUT, "ov29", word_at(GET_AND_STORE_BUTTON_INPUT) == PUSH_R3_LR))
+    checks.append((ALERT_BOX_PAUSE_CMP, "ov29", word_at(ALERT_BOX_PAUSE_CMP) == CMP_R0_180))
+    checks += [(addr, "arm9", word_at(addr, "arm9") == LDREQ_R0_R4_100) for addr in TEXT_SPEED_LOADS]
+    checks.append((UPDATE_ALERT_BOX, "arm9", word_at(UPDATE_ALERT_BOX, "arm9") == PUSH_R3_R9_LR))
+    checks.append((ADVANCE_FRAME, "ov29", word_at(ADVANCE_FRAME) == PUSH_R3_LR))
+    checks += [(addr, "arm9", word_at(addr, "arm9") == LDRSH_R0_R4_4) for addr in ANIMATION_STEP_LOADS]
+    checks.append((FLOOR_CARD_DECREMENT, "ov29", word_at(FLOOR_CARD_DECREMENT) == SUB_R5_R5_1))
+    checks += [(addr, "ov29", word_at(addr) == word) for addr, word in FADE_DELTA_LOADS.items()]
+    checks += [(addr, "ov29", bl_target(addr, word_at(addr)) == ADVANCE_FRAME) for addr in PROJECTILE_ADVANCE_FRAMES]
 
-    for addr, ok in checks:
-        print(f"  {addr:#x}: {word_at(addr):08x} {'OK' if ok else 'UNEXPECTED'}")
-    if not all(ok for _, ok in checks):
+    for addr, binary, ok in checks:
+        print(f"  {binary} {addr:#x}: {word_at(addr, binary):08x} {'OK' if ok else 'UNEXPECTED'}")
+    if not all(ok for _, _, ok in checks):
         sys.exit("The ROM does not match: the speed patch cannot be applied.")
 
 

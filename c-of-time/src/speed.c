@@ -26,6 +26,23 @@ static void SpeedSetMultiplier(int multiplier) {
   SpeedAlertPauseThreshold = ALERT_BOX_TIMER_START - alert_box_pause_frames[multiplier - SPEED_MIN];
 }
 
+#define ALERT_BOX_STATE_PRINTING 2
+#define ALERT_BOX_STATE_SCROLLING 3
+
+extern void SpeedOrigUpdateAlertBox(struct window* window);
+
+// Scrolling moves the lines by 2 pixels per update, so extra updates per frame speed it up.
+__attribute__((used)) void SpeedUpdateAlertBox(struct window* window) {
+  SpeedOrigUpdateAlertBox(window);
+  struct alert_box* alert_box = window->params.contents.alert_box;
+  for (int i = SPEED_MIN; i < SpeedMultiplier; i++) {
+    if (alert_box->state != ALERT_BOX_STATE_PRINTING && alert_box->state != ALERT_BOX_STATE_SCROLLING) {
+      break;
+    }
+    SpeedOrigUpdateAlertBox(window);
+  }
+}
+
 static void SpeedShowMessage(void) {
   struct entity* leader = GetLeader();
   if (leader != NULL) {

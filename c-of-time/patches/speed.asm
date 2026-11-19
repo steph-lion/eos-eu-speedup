@@ -42,4 +42,7 @@
     bleq SpeedTextSpeedHook
   .org 0x2021B04
     bleq SpeedTextSpeedHook
+
+  .org UpdateAlertBox
+    b SpeedUpdateAlertBox
 .close

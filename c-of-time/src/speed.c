@@ -74,6 +74,15 @@ __attribute__((used)) void SpeedUpdateAlertBox(struct window* window) {
   }
 }
 
+// Same value the text renderer uses for text that must appear all at once.
+#define TEXT_INSTANT_CHARS 1024
+
+__attribute__((used)) int SpeedTextCharsPerStep(int chars) {
+  struct buttons held;
+  GetHeldButtons(0, &held);
+  return held.b ? TEXT_INSTANT_CHARS : chars * SpeedMultiplier;
+}
+
 static void SpeedShowMessage(void) {
   struct entity* leader = GetLeader();
   if (leader != NULL) {

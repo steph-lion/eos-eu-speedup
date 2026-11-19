@@ -36,3 +36,10 @@
     bl SpeedAlertPauseCompare
 .close
 
+// Text renderer: characters revealed per step ("ldreq r0, [r4, #100]") scaled by the speed.
+.open "arm9.bin", arm9_start
+  .org 0x2021028
+    bleq SpeedTextSpeedHook
+  .org 0x2021B04
+    bleq SpeedTextSpeedHook
+.close

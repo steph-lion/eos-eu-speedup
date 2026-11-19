@@ -21,3 +21,13 @@ SpeedAlertPauseCompare:
   pop  {r1, pc}
 .pool
 
+.align 4
+.global SpeedTextSpeedHook
+SpeedTextSpeedHook:
+  push {r1, lr}
+  ldr  r0, [r4, #100]
+  ldr  r1, =SpeedMultiplier
+  ldr  r1, [r1]
+  mul  r0, r1, r0
+  pop  {r1, pc}
+.pool

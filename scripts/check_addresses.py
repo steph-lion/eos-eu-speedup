@@ -10,6 +10,8 @@ GET_AND_STORE_BUTTON_INPUT = 0x22E13A4
 PUSH_R3_LR = 0xE92D4008
 ALERT_BOX_PAUSE_CMP = 0x234C67C
 CMP_R0_180 = 0xE35000B4
+TEXT_SPEED_LOADS = [0x2021028, 0x2021B04]
+LDREQ_R0_R4_100 = 0x05940064
 
 
 def bl_target(addr: int, word: int) -> int | None:
@@ -26,14 +28,20 @@ def main() -> None:
     parser.add_argument("rom")
     args = parser.parse_args()
 
-    overlay = NintendoDSRom.fromFile(args.rom).loadArm9Overlays()[29]
+    rom = NintendoDSRom.fromFile(args.rom)
+    overlay = rom.loadArm9Overlays()[29]
+    arm9 = rom.loadArm9()
+    arm9_data = arm9.save(compress=False)
 
     def word_at(addr: int) -> int:
+        if addr < overlay.ramAddress:
+            return struct.unpack_from("<I", arm9_data, addr - arm9.ramAddress)[0]
         return struct.unpack_from("<I", overlay.data, addr - overlay.ramAddress)[0]
 
     checks = [(addr, bl_target(addr, word_at(addr)) == GET_SPEED_OPTION) for addr in SPEED_OPTION_CALL_SITES]
     checks.append((GET_AND_STORE_BUTTON_INPUT, word_at(GET_AND_STORE_BUTTON_INPUT) == PUSH_R3_LR))
     checks.append((ALERT_BOX_PAUSE_CMP, word_at(ALERT_BOX_PAUSE_CMP) == CMP_R0_180))
+    checks += [(addr, word_at(addr) == LDREQ_R0_R4_100) for addr in TEXT_SPEED_LOADS]
 
     for addr, ok in checks:
         print(f"  {addr:#x}: {word_at(addr):08x} {'OK' if ok else 'UNEXPECTED'}")

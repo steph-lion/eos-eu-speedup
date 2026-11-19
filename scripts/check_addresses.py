@@ -15,8 +15,8 @@ LDREQ_R0_R4_100 = 0x05940064
 UPDATE_ALERT_BOX = 0x2030568
 PUSH_R3_R9_LR = 0xE92D43F8
 ADVANCE_FRAME = 0x22EA990
-ANIMATION_STEP_LOADS = [0x201C524, 0x201C53C, 0x201C568]
-LDRSH_R0_R4_4 = 0xE1D400F4
+SWITCH_ANIMATION_CONTROL = 0x201C4F4
+PUSH_R4_LR = 0xE92D4010
 FLOOR_CARD_DECREMENT = 0x2349020
 SUB_R5_R5_1 = 0xE2455001
 FADE_DELTA_LOADS = {0x234D544: 0xE5940094, 0x234D56C: 0xE5941094, 0x234D598: 0xE5940094, 0x234D5C0: 0xE5940094}
@@ -55,7 +55,7 @@ def main() -> None:
     checks += [(addr, "arm9", word_at(addr, "arm9") == LDREQ_R0_R4_100) for addr in TEXT_SPEED_LOADS]
     checks.append((UPDATE_ALERT_BOX, "arm9", word_at(UPDATE_ALERT_BOX, "arm9") == PUSH_R3_R9_LR))
     checks.append((ADVANCE_FRAME, "ov29", word_at(ADVANCE_FRAME) == PUSH_R3_LR))
-    checks += [(addr, "arm9", word_at(addr, "arm9") == LDRSH_R0_R4_4) for addr in ANIMATION_STEP_LOADS]
+    checks.append((SWITCH_ANIMATION_CONTROL, "arm9", word_at(SWITCH_ANIMATION_CONTROL, "arm9") == PUSH_R4_LR))
     checks.append((FLOOR_CARD_DECREMENT, "ov29", word_at(FLOOR_CARD_DECREMENT) == SUB_R5_R5_1))
     checks += [(addr, "ov29", word_at(addr) == word) for addr, word in FADE_DELTA_LOADS.items()]
     checks += [(addr, "ov29", bl_target(addr, word_at(addr)) == ADVANCE_FRAME) for addr in PROJECTILE_ADVANCE_FRAMES]

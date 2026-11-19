@@ -48,13 +48,10 @@ SpeedAdvanceFrameHook:
   b    AdvanceFrame+4
 
 .align 4
-.global SpeedAnimationStepHook
-SpeedAnimationStepHook:
-  push {r1, r2, r3, r4, ip, lr}
-  bl   SpeedGetAnimationMultiplier
-  ldrsh r1, [r4, #4]
-  mul  r0, r1, r0
-  pop  {r1, r2, r3, r4, ip, pc}
+.global SpeedOrigSwitchAnimationControlToNextFrame
+SpeedOrigSwitchAnimationControlToNextFrame:
+  push {r4, lr}
+  b    SwitchAnimationControlToNextFrame+4
 
 .align 4
 .global SpeedFloorCardStep
@@ -87,3 +84,4 @@ SpeedFadeDeltaR1:
   mul  r1, r0, r1
   pop  {r0, pc}
 .pool
+

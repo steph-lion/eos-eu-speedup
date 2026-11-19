@@ -33,8 +33,18 @@ __attribute__((used)) void SpeedOnDungeonFrame(void) {
   last_dungeon_frame = FRAMES_SINCE_LAUNCH;
 }
 
-__attribute__((used)) int SpeedGetAnimationMultiplier(void) {
+static int SpeedGetAnimationMultiplier(void) {
   return (FRAMES_SINCE_LAUNCH - last_dungeon_frame <= 2) ? SpeedMultiplier : SPEED_MIN;
+}
+
+extern void SpeedOrigSwitchAnimationControlToNextFrame(struct animation_control* animation_control);
+
+// Advancing the animation N times per frame also handles frames shorter than N ticks.
+__attribute__((used)) void SpeedSwitchAnimationControlToNextFrame(struct animation_control* animation_control) {
+  int ticks = SpeedGetAnimationMultiplier();
+  for (int i = 0; i < ticks; i++) {
+    SpeedOrigSwitchAnimationControlToNextFrame(animation_control);
+  }
 }
 
 __attribute__((section(".data"))) static int projectile_frames = 0;

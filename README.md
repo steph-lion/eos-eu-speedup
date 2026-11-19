@@ -15,12 +15,14 @@ What the speed affects:
 - **Message pause**: after each dungeon message ("X used Y!") the game blocks for 60 frames at 1x, 30 at 2x, 20 at 3x and 15 at 4x. The message stays on screen for its usual time.
 - **Animations**: every sprite animation in a dungeon (attacks, move effects, hit reactions, idle) advances N steps per frame. Outside dungeons animations run at normal speed.
 - **Message box**: the dungeon message box prints and scrolls its lines up to N times per frame.
+- **Floor transitions**: the floor title card and the dungeon fades last 1/N of their usual time.
+- **Projectiles**: thrown items and projectile moves fly N times faster.
 - **Text speed**: text is revealed 1 to 4 characters per step, in dungeons and in every other dialogue, using the last speed set in a dungeon.
 
 Notes:
 - The setting persists until the game is turned off. It starts at 1x on boot.
 - Inside dungeons, Select is used only for the speed setting. Its vanilla action is disabled there.
-- Cutscene movement, the guild and towns run at normal speed. Dialogue still waits for a button press.
+- Outside dungeons only the text speed changes: movement, the guild, towns and cutscenes run at normal speed. Dialogue still waits for a button press.
 - The speed message is localized for all five EU languages.
 
 
@@ -121,6 +123,8 @@ Speed cycling hooks `GetAndStoreButtonInput`. The hook reads Select, then clears
 `UpdateAlertBox` prints one line or scrolls the message box by 2 pixels per call. While the box is printing or scrolling, the patch calls it up to N times per frame.
 
 `SwitchAnimationControlToNextFrame` subtracts an animation step from the current frame duration every frame. In dungeons the patch multiplies that step by the speed. A hook on `AdvanceFrame`, which only runs in dungeon mode, tells the patch whether a dungeon is active.
+
+`HandleFloorCard` counts the title card frames down by N, and the dungeon fade update multiplies its per-frame brightness change by N where it is read. The projectile flight loops only call `AdvanceFrame` on every Nth iteration.
 
 The text renderer copies a "characters per step" value from the text box state before revealing text. The patch multiplies that value by the speed at both places where it is read.
 

@@ -9,6 +9,7 @@ The speed-up is native: the game logic is not run multiple times per frame. Dura
 | Input | Effect |
 |---|---|
 | **Select** (in a dungeon) | Cycles the speed 1x → 2x → 3x → 4x → 1x and shows it in the message log |
+| **Hold B** (anywhere) | Text appears instantly |
 
 What the speed affects:
 - **Walking** of every Pokémon on the floor, team members and enemies alike.
@@ -43,7 +44,7 @@ You need your own **European** Explorers of Sky ROM (game code `C2SP`):
 **Notes:**
 - Saves from the original ROM are compatible: copy the `.sav` file and give it the same name as the patched ROM.
 - After updating the patch, load in-game saves rather than emulator savestates. Savestates keep the previous version of the patch code in memory.
-- Tested on melonDS. Real 3DS testing is still pending.
+- Tested on melonDS and on a 3DS with TWiLight Menu++ (nds-bootstrap).
 
 This repository does not contain or distribute any ROM.
 
@@ -127,7 +128,7 @@ Speed cycling hooks `GetAndStoreButtonInput`. The hook reads Select, then clears
 
 `HandleFloorCard` counts the title card frames down by N, and the dungeon fade update multiplies its per-frame brightness change by N where it is read. `TryPointCameraToMonster` waits for a frame counter to reach a threshold; the patch reads the counter multiplied by N, so it also works with patches that change the threshold. The projectile flight loops only call `AdvanceFrame` on every Nth iteration.
 
-The text renderer copies a "characters per step" value from the text box state before revealing text. The patch multiplies that value by the speed at both places where it is read.
+The text renderer copies a "characters per step" value from the text box state before revealing text. The patch multiplies that value by the speed at both places where it is read, or replaces it with the renderer's own "show everything" value while B is held.
 
 ## Credits
 - [c-of-time](https://github.com/SkyTemple/c-of-time), vendored in `c-of-time/` at `1b6cabb`

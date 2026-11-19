@@ -26,6 +26,17 @@ static void SpeedSetMultiplier(int multiplier) {
   SpeedAlertPauseThreshold = ALERT_BOX_TIMER_START - alert_box_pause_frames[multiplier - SPEED_MIN];
 }
 
+// AdvanceFrame only runs in dungeon mode, so a recent stamp means we are in a dungeon.
+__attribute__((section(".data"))) static uint32_t last_dungeon_frame = 0xFFFF0000;
+
+__attribute__((used)) void SpeedOnDungeonFrame(void) {
+  last_dungeon_frame = FRAMES_SINCE_LAUNCH;
+}
+
+__attribute__((used)) int SpeedGetAnimationMultiplier(void) {
+  return (FRAMES_SINCE_LAUNCH - last_dungeon_frame <= 2) ? SpeedMultiplier : SPEED_MIN;
+}
+
 #define ALERT_BOX_STATE_PRINTING 2
 #define ALERT_BOX_STATE_SCROLLING 3
 

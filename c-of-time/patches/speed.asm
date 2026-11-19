@@ -31,6 +31,9 @@
   .org GetAndStoreButtonInput
     b SpeedButtonInputHook
 
+  .org AdvanceFrame
+    b SpeedAdvanceFrameHook
+
   // WaitUntilAlertBoxPauseIsOver: "cmp r0, #180" against a speed-dependent threshold.
   .org 0x234C67C
     bl SpeedAlertPauseCompare
@@ -45,4 +48,12 @@
 
   .org UpdateAlertBox
     b SpeedUpdateAlertBox
+
+  // SwitchAnimationControlToNextFrame: "ldrsh r0, [r4, #4]" (animation step) scaled in dungeons.
+  .org 0x201C524
+    bl SpeedAnimationStepHook
+  .org 0x201C53C
+    bl SpeedAnimationStepHook
+  .org 0x201C568
+    bl SpeedAnimationStepHook
 .close

@@ -37,3 +37,21 @@ SpeedTextSpeedHook:
 SpeedOrigUpdateAlertBox:
   push {r3, r4, r5, r6, r7, r8, r9, lr}
   b    UpdateAlertBox+4
+
+.align 4
+.global SpeedAdvanceFrameHook
+SpeedAdvanceFrameHook:
+  push {r0-r3, ip, lr}
+  bl   SpeedOnDungeonFrame
+  pop  {r0-r3, ip, lr}
+  push {r3, lr}
+  b    AdvanceFrame+4
+
+.align 4
+.global SpeedAnimationStepHook
+SpeedAnimationStepHook:
+  push {r1, r2, r3, r4, ip, lr}
+  bl   SpeedGetAnimationMultiplier
+  ldrsh r1, [r4, #4]
+  mul  r0, r1, r0
+  pop  {r1, r2, r3, r4, ip, pc}

@@ -14,6 +14,9 @@ TEXT_SPEED_LOADS = [0x2021028, 0x2021B04]
 LDREQ_R0_R4_100 = 0x05940064
 UPDATE_ALERT_BOX = 0x2030568
 PUSH_R3_R9_LR = 0xE92D43F8
+ADVANCE_FRAME = 0x22EA990
+ANIMATION_STEP_LOADS = [0x201C524, 0x201C53C, 0x201C568]
+LDRSH_R0_R4_4 = 0xE1D400F4
 
 
 def bl_target(addr: int, word: int) -> int | None:
@@ -45,6 +48,8 @@ def main() -> None:
     checks.append((ALERT_BOX_PAUSE_CMP, word_at(ALERT_BOX_PAUSE_CMP) == CMP_R0_180))
     checks += [(addr, word_at(addr) == LDREQ_R0_R4_100) for addr in TEXT_SPEED_LOADS]
     checks.append((UPDATE_ALERT_BOX, word_at(UPDATE_ALERT_BOX) == PUSH_R3_R9_LR))
+    checks.append((ADVANCE_FRAME, word_at(ADVANCE_FRAME) == PUSH_R3_LR))
+    checks += [(addr, word_at(addr) == LDRSH_R0_R4_4) for addr in ANIMATION_STEP_LOADS]
 
     for addr, ok in checks:
         print(f"  {addr:#x}: {word_at(addr):08x} {'OK' if ok else 'UNEXPECTED'}")

@@ -10,13 +10,18 @@ The speed-up is native: the game logic is not run multiple times per frame. Dura
 |---|---|
 | **Select** (in a dungeon) | Cycles the speed 1x → 2x → 3x → 4x → 1x and shows it in the message log |
 
-- Speeds up walking for every Pokémon on the floor: team members and enemies alike.
+What the speed affects:
+- **Walking** of every Pokémon on the floor, team members and enemies alike.
+- **Message pause**: after each dungeon message ("X used Y!") the game blocks for 60 frames at 1x, 30 at 2x, 20 at 3x and 15 at 4x. The message stays on screen for its usual time.
+- **Text speed**: text is revealed 1 to 4 characters per step, in dungeons and in every other dialogue, using the last speed set in a dungeon.
+
+Notes:
 - The setting persists until the game is turned off. It starts at 1x on boot.
 - Inside dungeons, Select is used only for the speed setting. Its vanilla action is disabled there.
-- Cutscenes, the guild and towns run at normal speed.
-- The message is localized for all five EU languages.
+- Cutscene movement, the guild and towns run at normal speed. Dialogue still waits for a button press.
+- The speed message is localized for all five EU languages.
 
-**Planned:** attack and effect animations, turn delays, text speed, and a menu option saved to the save file.
+**Planned:** attack and effect animations, the dungeon message box scrolling, and a menu option saved to the save file.
 
 ## Installation
 
@@ -109,6 +114,10 @@ bash scripts/build_rom.sh path/to/hack.nds out/hack-speedup.nds
 The game has an internal "Speed" option (`GetSpeedOption`). When it is set to fast, the game uses a walk multiplier of 2: each tile takes 24 / multiplier frames and the sprite moves multiplier pixels per frame. The multiplier is computed in three places in overlay 29. The patch replaces all three with a value from 1 to 4. Since 24 is divisible by 1, 2, 3 and 4, every step stays whole and even.
 
 Speed cycling hooks `GetAndStoreButtonInput`. The hook reads Select, then clears it from the input the dungeon sees.
+
+`LogMessage` starts the message box timer at 240 frames and `WaitUntilAlertBoxPauseIsOver` blocks until it drops below 180. The patch raises that threshold with the speed, so the blocking part shrinks while the box keeps its display time.
+
+The text renderer copies a "characters per step" value from the text box state before revealing text. The patch multiplies that value by the speed at both places where it is read.
 
 ## Credits
 - [c-of-time](https://github.com/SkyTemple/c-of-time), vendored in `c-of-time/` at `1b6cabb`

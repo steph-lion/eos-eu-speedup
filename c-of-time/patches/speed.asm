@@ -30,4 +30,9 @@
 
   .org GetAndStoreButtonInput
     b SpeedButtonInputHook
+
+  // WaitUntilAlertBoxPauseIsOver: "cmp r0, #180" against a speed-dependent threshold.
+  .org 0x234C67C
+    bl SpeedAlertPauseCompare
 .close
+

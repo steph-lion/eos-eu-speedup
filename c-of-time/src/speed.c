@@ -7,18 +7,29 @@
 #define SPEED_STRING_FIRST_ID 17298
 
 // Explicitly placed in .data so the initial values are stored in the ROM.
-__attribute__((section(".data"))) static int speed_multiplier = SPEED_MIN;
+__attribute__((used, section(".data"))) int SpeedMultiplier = SPEED_MIN;
 __attribute__((section(".data"))) static bool select_was_held = true;
 __attribute__((section(".data"))) static bool in_input_hook = false;
 
+// LogMessage sets the alert box timer to 240 and WaitUntilAlertBoxPauseIsOver blocks
+// until it drops below 180, so the blocking pause lasts 60 frames at 1x.
+#define ALERT_BOX_TIMER_START 240
+static const int alert_box_pause_frames[SPEED_MAX] = {60, 30, 20, 15};
+__attribute__((used, section(".data"))) int SpeedAlertPauseThreshold = ALERT_BOX_TIMER_START - 60;
+
 __attribute__((used)) int SpeedGetMultiplier(void) {
-  return speed_multiplier;
+  return SpeedMultiplier;
+}
+
+static void SpeedSetMultiplier(int multiplier) {
+  SpeedMultiplier = multiplier;
+  SpeedAlertPauseThreshold = ALERT_BOX_TIMER_START - alert_box_pause_frames[multiplier - SPEED_MIN];
 }
 
 static void SpeedShowMessage(void) {
   struct entity* leader = GetLeader();
   if (leader != NULL) {
-    LogMessageById(leader, SPEED_STRING_FIRST_ID + speed_multiplier - SPEED_MIN, true);
+    LogMessageById(leader, SPEED_STRING_FIRST_ID + SpeedMultiplier - SPEED_MIN, true);
   }
 }
 
@@ -36,7 +47,7 @@ __attribute__((used)) void SpeedOnButtonInput(void) {
   bool just_pressed = select_now && !select_was_held;
   select_was_held = select_now;
   if (just_pressed) {
-    speed_multiplier = (speed_multiplier >= SPEED_MAX) ? SPEED_MIN : speed_multiplier + 1;
+    SpeedSetMultiplier((SpeedMultiplier >= SPEED_MAX) ? SPEED_MIN : SpeedMultiplier + 1);
     SpeedShowMessage();
   }
 

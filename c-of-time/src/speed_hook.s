@@ -10,3 +10,14 @@ SpeedButtonInputHook:
 SpeedOrigGetAndStoreButtonInput:
   push {r3, lr}
   b    GetAndStoreButtonInput+4
+
+.align 4
+.global SpeedAlertPauseCompare
+SpeedAlertPauseCompare:
+  push {r1, lr}
+  ldr  r1, =SpeedAlertPauseThreshold
+  ldr  r1, [r1]
+  cmp  r0, r1
+  pop  {r1, pc}
+.pool
+

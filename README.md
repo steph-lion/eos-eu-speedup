@@ -16,6 +16,7 @@ What the speed affects:
 - **Animations**: every sprite animation in a dungeon (attacks, move effects, hit reactions, idle) advances N times per frame. Outside dungeons animations run at normal speed.
 - **Message box**: the dungeon message box prints and scrolls its lines up to N times per frame.
 - **Floor transitions**: the floor title card and the dungeon fades last 1/N of their usual time.
+- **Camera switches**: the pause before the camera moves to another Pokémon lasts 1/N of its usual time.
 - **Projectiles**: thrown items and projectile moves fly N times faster.
 - **Text speed**: text is revealed 1 to 4 characters per step, in dungeons and in every other dialogue, using the last speed set in a dungeon.
 
@@ -124,7 +125,7 @@ Speed cycling hooks `GetAndStoreButtonInput`. The hook reads Select, then clears
 
 `SwitchAnimationControlToNextFrame` advances an animation by one tick. In dungeons the patch runs it N times per frame, which also covers frames shorter than N ticks, such as most move effects. A hook on `AdvanceFrame`, which only runs in dungeon mode, tells the patch whether a dungeon is active.
 
-`HandleFloorCard` counts the title card frames down by N, and the dungeon fade update multiplies its per-frame brightness change by N where it is read. The projectile flight loops only call `AdvanceFrame` on every Nth iteration.
+`HandleFloorCard` counts the title card frames down by N, and the dungeon fade update multiplies its per-frame brightness change by N where it is read. `TryPointCameraToMonster` waits for a frame counter to reach a threshold; the patch reads the counter multiplied by N, so it also works with patches that change the threshold. The projectile flight loops only call `AdvanceFrame` on every Nth iteration.
 
 The text renderer copies a "characters per step" value from the text box state before revealing text. The patch multiplies that value by the speed at both places where it is read.
 
